@@ -177,11 +177,20 @@ const formatDateTime = (date) => {
   return format(new Date(date), 'dd MMMM yyyy HH:mm', { locale: id });
 };
 
+// ✅ DIPERBAIKI
 const getDocumentUrl = (path) => {
   if (!path) return '';
-  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-  const cleanPath = path.startsWith('/') ? path : `/${path}`;
-  return `${baseUrl}/storage${cleanPath}`;
+  
+  // Jika path sudah full URL, return langsung
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path;
+  }
+  
+  // Hapus leading slash jika ada
+  const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+  
+  // Return URL yang benar
+  return `https://mbg.erpdis.com/storage/${cleanPath}`;
 };
 
 const getBadgeVariant = (status) => {

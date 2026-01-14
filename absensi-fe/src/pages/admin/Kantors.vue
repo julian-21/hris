@@ -1,273 +1,283 @@
 <template>
-  <div>
+  <div class="space-y-6">
     <!-- Header -->
-    <div class="mb-6 flex justify-between items-center">
+    <div class="flex justify-between items-start">
       <div>
-        <h1 class="text-2xl font-bold text-gray-900">Manajemen Kantor</h1>
-        <p class="text-gray-600 mt-1">Kelola data kantor dan lokasi</p>
+        <h1 class="text-3xl font-bold tracking-tight">Manajemen Kantor</h1>
+        <p class="text-muted-foreground mt-2">Kelola data kantor dan lokasi</p>
       </div>
-      <button
-        @click="openModal()"
-        class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors flex items-center"
-      >
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-        </svg>
+      <Button @click="openModal()" size="default">
+        <Plus class="mr-2 h-4 w-4" />
         Tambah Kantor
-      </button>
+      </Button>
+    </div>
+
+    <!-- Loading State -->
+    <div v-if="loading" class="flex flex-col items-center justify-center py-12">
+      <Loader2 class="h-8 w-8 animate-spin text-primary" />
+      <p class="text-muted-foreground mt-4">Memuat data...</p>
     </div>
 
     <!-- Kantors Grid -->
-    <div v-if="loading" class="text-center py-12">
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-      <p class="text-gray-600 mt-2">Memuat data...</p>
-    </div>
-
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div
-        v-for="kantor in kantors"
-        :key="kantor.id"
-        class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow"
-      >
-        <div class="p-6">
-          <!-- Header -->
-          <div class="flex justify-between items-start mb-4">
-            <div>
-              <h3 class="text-lg font-semibold text-gray-900">{{ kantor.nama }}</h3>
-              <span
-                :class="[
-                  'inline-block px-2 py-1 text-xs font-semibold rounded-full mt-2',
-                  kantor.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                ]"
-              >
+    <div v-else-if="kantors.length > 0" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <Card v-for="kantor in kantors" :key="kantor.id" class="overflow-hidden">
+        <CardHeader class="pb-3">
+          <div class="flex items-start justify-between">
+            <div class="space-y-2 flex-1">
+              <CardTitle class="text-xl">{{ kantor.nama }}</CardTitle>
+              <Badge :variant="kantor.is_active ? 'default' : 'secondary'">
                 {{ kantor.is_active ? 'Aktif' : 'Nonaktif' }}
-              </span>
+              </Badge>
             </div>
-            <div class="flex space-x-2">
-              <button
-                @click="openModal(kantor)"
-                class="text-blue-600 hover:text-blue-800"
-                title="Edit"
+            <div class="flex gap-2">
+              <Button 
+                @click="openModal(kantor)" 
+                variant="ghost" 
+                size="icon"
+                class="h-8 w-8"
               >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-              </button>
-              <button
-                @click="handleDelete(kantor)"
-                class="text-red-600 hover:text-red-800"
-                title="Hapus"
+                <Pencil class="h-4 w-4" />
+              </Button>
+              <Button 
+                @click="handleDelete(kantor)" 
+                variant="ghost" 
+                size="icon"
+                class="h-8 w-8 text-destructive hover:text-destructive"
               >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-              </button>
+                <Trash2 class="h-4 w-4" />
+              </Button>
             </div>
           </div>
-
+        </CardHeader>
+        
+        <CardContent class="space-y-4">
           <!-- Address -->
-          <div class="mb-4">
-            <div class="flex items-start text-sm text-gray-600">
-              <svg class="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              <span>{{ kantor.alamat }}</span>
-            </div>
+          <div class="flex items-start gap-2">
+            <MapPin class="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" />
+            <p class="text-sm text-muted-foreground">{{ kantor.alamat }}</p>
           </div>
 
           <!-- Coordinates -->
-          <div class="mb-4 space-y-1">
-            <div class="flex items-center text-xs text-gray-500">
-              <span class="font-medium w-20">Latitude:</span>
-              <span>{{ kantor.latitude }}</span>
+          <div class="space-y-2 rounded-lg bg-muted/50 p-3">
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-muted-foreground">Latitude:</span>
+              <span class="font-mono">{{ kantor.latitude }}</span>
             </div>
-            <div class="flex items-center text-xs text-gray-500">
-              <span class="font-medium w-20">Longitude:</span>
-              <span>{{ kantor.longitude }}</span>
+            <Separator />
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-muted-foreground">Longitude:</span>
+              <span class="font-mono">{{ kantor.longitude }}</span>
             </div>
-            <div class="flex items-center text-xs text-gray-500">
-              <span class="font-medium w-20">Radius:</span>
-              <span>{{ kantor.radius }} meter</span>
+            <Separator />
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-muted-foreground">Radius:</span>
+              <span class="font-medium">{{ kantor.radius }} meter</span>
             </div>
           </div>
 
           <!-- View on Map -->
-          <a
-            :href="`https://www.google.com/maps?q=${kantor.latitude},${kantor.longitude}`"
-            target="_blank"
-            class="inline-flex items-center text-sm text-indigo-600 hover:text-indigo-800"
+          <Button 
+            variant="outline" 
+            size="sm" 
+            class="w-full"
+            as-child
           >
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-            </svg>
-            Lihat di Google Maps
-          </a>
-        </div>
-      </div>
-
-      <!-- Empty State -->
-      <div v-if="kantors.length === 0" class="col-span-full text-center py-12">
-        <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-        </svg>
-        <p class="text-gray-600">Belum ada data kantor</p>
-        <button
-          @click="openModal()"
-          class="mt-4 text-indigo-600 hover:text-indigo-800 font-medium"
-        >
-          Tambah Kantor Pertama
-        </button>
-      </div>
+            <a 
+              :href="`https://www.google.com/maps?q=${kantor.latitude},${kantor.longitude}`"
+              target="_blank"
+              class="flex items-center justify-center"
+            >
+              <Map class="mr-2 h-4 w-4" />
+              Lihat di Google Maps
+            </a>
+          </Button>
+        </CardContent>
+      </Card>
     </div>
+
+    <!-- Empty State -->
+    <Card v-else class="border-dashed">
+      <CardContent class="flex flex-col items-center justify-center py-12">
+        <div class="rounded-full bg-muted p-4 mb-4">
+          <Building2 class="h-10 w-10 text-muted-foreground" />
+        </div>
+        <h3 class="text-lg font-semibold mb-2">Belum ada data kantor</h3>
+        <p class="text-muted-foreground text-sm mb-4">Mulai dengan menambahkan kantor pertama Anda</p>
+        <Button @click="openModal()" variant="outline">
+          <Plus class="mr-2 h-4 w-4" />
+          Tambah Kantor Pertama
+        </Button>
+      </CardContent>
+    </Card>
 
     <!-- Modal Form -->
-    <div
-      v-if="showModal"
-      class="fixed inset-0 z-50 overflow-y-auto"
-      aria-labelledby="modal-title"
-      role="dialog"
-      aria-modal="true"
-    >
-      <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <!-- Background overlay -->
-        <div
-          @click="closeModal"
-          class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-          aria-hidden="true"
-        ></div>
+    <Dialog v-model:open="showModal">
+      <DialogContent class="sm:max-w-[600px]">
+        <DialogHeader>
+          <DialogTitle>{{ isEdit ? 'Edit Kantor' : 'Tambah Kantor' }}</DialogTitle>
+          <DialogDescription>
+            {{ isEdit ? 'Perbarui informasi kantor' : 'Tambahkan kantor baru ke sistem' }}
+          </DialogDescription>
+        </DialogHeader>
 
-        <!-- Modal panel -->
-        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-          <form @submit.prevent="handleSubmit">
-            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-              <h3 class="text-lg font-medium text-gray-900 mb-4">
-                {{ isEdit ? 'Edit Kantor' : 'Tambah Kantor' }}
-              </h3>
+        <form @submit.prevent="handleSubmit" class="space-y-6">
+          <div class="space-y-4">
+            <!-- Nama -->
+            <div class="space-y-2">
+              <Label for="nama">
+                Nama Kantor <span class="text-destructive">*</span>
+              </Label>
+              <Input
+                id="nama"
+                v-model="form.nama"
+                type="text"
+                required
+                placeholder="Contoh: Kantor Pusat Jakarta"
+              />
+            </div>
 
-              <!-- Nama -->
-              <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                  Nama Kantor <span class="text-red-500">*</span>
-                </label>
-                <input
-                  v-model="form.nama"
-                  type="text"
-                  required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="Contoh: Kantor Pusat Jakarta"
-                />
-              </div>
+            <!-- Alamat -->
+            <div class="space-y-2">
+              <Label for="alamat">
+                Alamat <span class="text-destructive">*</span>
+              </Label>
+              <Textarea
+                id="alamat"
+                v-model="form.alamat"
+                required
+                rows="3"
+                placeholder="Alamat lengkap kantor"
+              />
+            </div>
 
-              <!-- Alamat -->
-              <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                  Alamat <span class="text-red-500">*</span>
-                </label>
-                <textarea
-                  v-model="form.alamat"
-                  required
-                  rows="2"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="Alamat lengkap kantor"
-                ></textarea>
-              </div>
-
-              <!-- Latitude & Longitude -->
-              <div class="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">
-                    Latitude <span class="text-red-500">*</span>
-                  </label>
-                  <input
-                    v-model.number="form.latitude"
-                    type="number"
-                    step="any"
-                    required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="-6.2088"
-                  />
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">
-                    Longitude <span class="text-red-500">*</span>
-                  </label>
-                  <input
-                    v-model.number="form.longitude"
-                    type="number"
-                    step="any"
-                    required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="106.8456"
-                  />
-                </div>
-              </div>
-
-              <!-- Radius -->
-              <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                  Radius (meter) <span class="text-red-500">*</span>
-                </label>
-                <input
-                  v-model.number="form.radius"
+            <!-- Latitude & Longitude -->
+            <div class="grid grid-cols-2 gap-4">
+              <div class="space-y-2">
+                <Label for="latitude">
+                  Latitude <span class="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="latitude"
+                  v-model.number="form.latitude"
                   type="number"
+                  step="any"
                   required
-                  min="1"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="100"
+                  placeholder="-6.2088"
                 />
-                <p class="text-xs text-gray-500 mt-1">Jarak maksimal untuk check-in</p>
               </div>
-
-              <!-- Status -->
-              <div class="mb-4">
-                <label class="flex items-center">
-                  <input
-                    v-model="form.is_active"
-                    type="checkbox"
-                    class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                  />
-                  <span class="ml-2 text-sm text-gray-700">Kantor Aktif</span>
-                </label>
-              </div>
-
-              <!-- Tip -->
-              <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                <p class="text-xs text-blue-800">
-                  💡 <strong>Tip:</strong> Gunakan Google Maps untuk mendapatkan koordinat yang akurat. 
-                  Klik kanan pada lokasi → pilih koordinat untuk menyalin.
-                </p>
+              <div class="space-y-2">
+                <Label for="longitude">
+                  Longitude <span class="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="longitude"
+                  v-model.number="form.longitude"
+                  type="number"
+                  step="any"
+                  required
+                  placeholder="106.8456"
+                />
               </div>
             </div>
 
-            <!-- Actions -->
-            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-3">
-              <button
-                type="submit"
-                :disabled="saving"
-                class="w-full sm:w-auto inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-              >
-                {{ saving ? 'Menyimpan...' : (isEdit ? 'Update' : 'Simpan') }}
-              </button>
-              <button
-                type="button"
-                @click="closeModal"
-                :disabled="saving"
-                class="mt-3 w-full sm:mt-0 sm:w-auto inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Batal
-              </button>
+            <!-- Radius -->
+            <div class="space-y-2">
+              <Label for="radius">
+                Radius (meter) <span class="text-destructive">*</span>
+              </Label>
+              <Input
+                id="radius"
+                v-model.number="form.radius"
+                type="number"
+                required
+                min="1"
+                placeholder="100"
+              />
+              <p class="text-xs text-muted-foreground">Jarak maksimal untuk check-in</p>
             </div>
-          </form>
-        </div>
-      </div>
-    </div>
+
+            <!-- Status -->
+            <div class="flex items-center space-x-2">
+              <Checkbox 
+                id="is_active" 
+                v-model:checked="form.is_active"
+              />
+              <Label 
+                for="is_active" 
+                class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Kantor Aktif
+              </Label>
+            </div>
+
+            <!-- Tip -->
+            <Alert>
+              <Lightbulb class="h-4 w-4" />
+              <AlertTitle>Tips</AlertTitle>
+              <AlertDescription class="text-xs">
+                Gunakan Google Maps untuk mendapatkan koordinat yang akurat. 
+                Klik kanan pada lokasi → pilih koordinat untuk menyalin.
+              </AlertDescription>
+            </Alert>
+          </div>
+
+          <DialogFooter>
+            <Button 
+              type="button" 
+              variant="outline" 
+              @click="closeModal"
+              :disabled="saving"
+            >
+              Batal
+            </Button>
+            <Button 
+              type="submit" 
+              :disabled="saving"
+            >
+              <Loader2 v-if="saving" class="mr-2 h-4 w-4 animate-spin" />
+              {{ saving ? 'Menyimpan...' : (isEdit ? 'Update' : 'Simpan') }}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import api from '../../services/api'
+
+// Shadcn UI Components
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Separator } from '@/components/ui/separator'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+
+// Lucide Icons
+import { 
+  Plus, 
+  Pencil, 
+  Trash2, 
+  MapPin, 
+  Map, 
+  Building2, 
+  Loader2,
+  Lightbulb 
+} from 'lucide-vue-next'
 
 const kantors = ref([])
 const loading = ref(false)

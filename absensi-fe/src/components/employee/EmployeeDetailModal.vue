@@ -5,7 +5,8 @@
       <DialogHeader class="px-6 py-5 border-b">
         <div class="flex items-start gap-4">
           <Avatar class="w-14 h-14">
-            <AvatarImage :src="employee?.avatar_url || getDefaultAvatar()" />
+            <!-- ✅ DIPERBAIKI: Gunakan picture_url -->
+            <AvatarImage :src="employee?.picture_url || getDefaultAvatar()" />
             <AvatarFallback class="bg-gray-100">
               <User class="w-7 h-7 text-gray-400" />
             </AvatarFallback>
@@ -142,7 +143,8 @@
                 class="border rounded-lg p-2.5 hover:bg-gray-50 transition">
                 <div class="flex items-center gap-2.5">
                   <Avatar class="w-8 h-8">
-                    <AvatarImage :src="bawahan.picture_url || getDefaultAvatar()" />
+                    <!-- ✅ DIPERBAIKI: Tambah parameter name -->
+                    <AvatarImage :src="bawahan.picture_url || getDefaultAvatar(bawahan.name)" />
                     <AvatarFallback class="bg-gray-100 text-xs">
                       {{ bawahan.name.substring(0, 2).toUpperCase() }}
                     </AvatarFallback>
@@ -229,9 +231,10 @@ const formatDate = (date) => {
   });
 };
 
-const getDefaultAvatar = () => {
-  const name = employee.value?.name || 'User';
-  const initials = name.split(' ')
+// ✅ DIPERBAIKI: Terima parameter name
+const getDefaultAvatar = (name = null) => {
+  const displayName = name || employee.value?.name || 'User';
+  const initials = displayName.split(' ')
     .map(word => word[0])
     .join('')
     .toUpperCase()

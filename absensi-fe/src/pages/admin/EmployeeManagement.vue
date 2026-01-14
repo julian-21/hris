@@ -217,8 +217,12 @@
               <TableCell>
                 <div class="flex items-center gap-3">
                   <Avatar class="h-10 w-10">
-                    <AvatarImage :src="emp.avatar_url || emp.picture_url || getDefaultAvatar(emp.name)" :alt="emp.name" />
-                    <AvatarFallback>{{ emp.name?.substring(0, 2).toUpperCase() }}</AvatarFallback>
+                    <AvatarImage 
+                      :src="getEmployeePhoto(emp)" 
+                      :alt="emp.name"
+                      @error="handleImageError" 
+                    />
+                    <AvatarFallback>{{ getInitials(emp.name) }}</AvatarFallback>
                   </Avatar>
                   <div class="min-w-0 flex-1">
                     <p class="font-medium text-sm truncate">{{ emp.name }}</p>
@@ -285,8 +289,12 @@
           <div class="flex items-start justify-between">
             <div class="flex items-center gap-3 flex-1 min-w-0">
               <Avatar class="h-12 w-12">
-                <AvatarImage :src="emp.avatar_url || emp.picture_url || getDefaultAvatar(emp.name)" :alt="emp.name" />
-                <AvatarFallback>{{ emp.name?.substring(0, 2).toUpperCase() }}</AvatarFallback>
+                <AvatarImage 
+                  :src="getEmployeePhoto(emp)" 
+                  :alt="emp.name"
+                  @error="handleImageError"
+                />
+                <AvatarFallback>{{ getInitials(emp.name) }}</AvatarFallback>
               </Avatar>
               <div class="min-w-0 flex-1">
                 <CardTitle class="text-base truncate">{{ emp.name }}</CardTitle>
@@ -419,35 +427,26 @@ import EmployeeModal from '@/components/employee/EmployeeModal.vue';
 import EmployeeDetailModal from '@/components/employee/EmployeeDetailModal.vue';
 import EmployeeHierarchyNode from '@/components/employee/EmployeeHierarchyNode.vue';
 
-// Setup axios base URL
+// Setup axios
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api',
+  baseURL: import.meta.env.VITE_API_URL || 'https://mbg.erpdis.com/api',
   headers: {
     'Accept': 'application/json',
     'Content-Type': 'application/json'
   }
 });
 
-// Add token to requests
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-  console.log('🔵 Request:', config.method?.toUpperCase(), config.url);
   return config;
 });
 
-// Handle responses
 api.interceptors.response.use(
-  (response) => {
-    console.log('✅ Response:', response.status, response.config.url);
-    return response;
-  },
-  (error) => {
-    console.error('❌ Error:', error.response?.status, error.config?.url, error.response?.data);
-    return Promise.reject(error);
-  }
+  (response) => response,
+  (error) => Promise.reject(error)
 );
 
 const loading = ref(true);
@@ -474,7 +473,6 @@ const filters = ref({
 
 let searchTimeout = null;
 
-// Computed property to check if any filter is active
 const hasActiveFilters = computed(() => {
   return filters.value.search || 
          filters.value.company || 
@@ -483,8 +481,40 @@ const hasActiveFilters = computed(() => {
          filters.value.is_active;
 });
 
+// Helper untuk get foto karyawan dengan fallback
+const getEmployeePhoto = (employee) => {
+  // Priority: picture_url (dari accessor) > avatar_url > default
+  if (employee.picture_url) return employee.picture_url;
+  if (employee.avatar_url) return employee.avatar_url;
+  return getDefaultAvatar(employee.name);
+};
+
+// Helper untuk get initials
+const getInitials = (name) => {
+  if (!name) return 'U';
+  const names = name.split(' ');
+  if (names.length === 1) return names[0].substring(0, 2).toUpperCase();
+  return (names[0][0] + names[names.length - 1][0]).toUpperCase();
+};
+
+// Handle image error
+const handleImageError = (event) => {
+  // Fallback ke default avatar jika image gagal load
+  const name = event.target.alt || 'User';
+  event.target.src = getDefaultAvatar(name);
+};
+
+const getDefaultAvatar = (name) => {
+  if (!name) return 'https://ui-avatars.com/api/?name=U&background=random&color=fff&size=200';
+  const initials = name.split(' ')
+    .map(word => word[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+  return `https://ui-avatars.com/api/?name=${initials}&background=random&color=fff&size=200`;
+};
+
 onMounted(async () => {
-  console.log('🚀 Component mounted');
   await loadEmployees();
   await loadStats();
   await loadOptions();
@@ -495,19 +525,14 @@ const loadEmployees = async () => {
   error.value = null;
   
   try {
-    console.log('📥 Loading employees with filters:', filters.value);
-    
     const params = new URLSearchParams();
     Object.keys(filters.value).forEach(key => {
       if (filters.value[key]) params.append(key, filters.value[key]);
     });
 
     const response = await api.get(`/employees?${params.toString()}`);
-    console.log('📦 Employees data:', response.data);
-    
     employees.value = response.data;
   } catch (err) {
-    console.error('❌ Error loading employees:', err);
     error.value = err.response?.data?.message || 'Gagal memuat data karyawan. Silakan cek koneksi dan coba lagi.';
   } finally {
     loading.value = false;
@@ -516,35 +541,29 @@ const loadEmployees = async () => {
 
 const loadStats = async () => {
   try {
-    console.log('📊 Loading stats');
     const response = await api.get('/employees/stats');
-    console.log('📦 Stats data:', response.data);
     stats.value = response.data;
   } catch (err) {
-    console.error('❌ Error loading stats:', err);
+    console.error('Error loading stats:', err);
   }
 };
 
 const loadOptions = async () => {
   try {
-    console.log('⚙️ Loading options');
     const response = await api.get('/employees/options');
-    console.log('📦 Options data:', response.data);
     options.value = response.data;
   } catch (err) {
-    console.error('❌ Error loading options:', err);
+    console.error('Error loading options:', err);
   }
 };
 
 const loadHierarchy = async () => {
   viewMode.value = 'hierarchy';
   try {
-    console.log('🌳 Loading hierarchy');
     const response = await api.get('/employees/hierarchy');
-    console.log('📦 Hierarchy data:', response.data);
     hierarchyData.value = response.data;
   } catch (err) {
-    console.error('❌ Error loading hierarchy:', err);
+    console.error('Error loading hierarchy:', err);
     alert('Gagal memuat hierarki karyawan');
   }
 };
@@ -609,18 +628,8 @@ const deleteEmployee = async (id) => {
     loadEmployees();
     loadStats();
   } catch (err) {
-    console.error('❌ Error deleting employee:', err);
+    console.error('Error deleting employee:', err);
     alert(err.response?.data?.message || 'Gagal menghapus karyawan');
   }
-};
-
-const getDefaultAvatar = (name) => {
-  if (!name) return 'https://ui-avatars.com/api/?name=U&background=random&color=fff&size=200';
-  const initials = name.split(' ')
-    .map(word => word[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
-  return `https://ui-avatars.com/api/?name=${initials}&background=random&color=fff&size=200`;
 };
 </script>

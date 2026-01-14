@@ -7,6 +7,10 @@ export default {
   ],
   theme: {
   	extend: {
+  		fontFamily: {
+  			sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+  			mono: ['"JetBrains Mono"', 'monospace']
+  		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
@@ -58,4 +62,3 @@ export default {
   },
   plugins: [require("tailwindcss-animate")],
 }
-

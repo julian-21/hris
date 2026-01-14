@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-background">
+  <div class="min-h-screen">
     <div class="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
       
       <!-- Header Section -->
@@ -79,11 +79,11 @@
               <!-- Change Badge -->
               <div class="flex items-center gap-2">
                 <Badge 
-                  :variant="stat.changeType === 'increase' ? 'default' : 'destructive'"
+                  :variant="stat.changeType === 'increase' ? 'default' : stat.changeType === 'decrease' ? 'destructive' : 'secondary'"
                   class="font-semibold"
                 >
                   <component 
-                    :is="stat.changeType === 'increase' ? TrendingUpIcon : TrendingDownIcon" 
+                    :is="stat.changeType === 'increase' ? TrendingUpIcon : stat.changeType === 'decrease' ? TrendingDownIcon : MinusIcon" 
                     class="h-3 w-3 mr-1"
                   />
                   {{ stat.change }}
@@ -96,6 +96,121 @@
           </Card>
         </template>
       </div>
+
+      <!-- Employee Carousel Section (Only for Admin/HR/Direktur) -->
+      <Card v-if="employees.length > 0">
+        <CardHeader>
+          <div class="flex items-center justify-between">
+            <div>
+              <CardTitle>Tim Karyawan</CardTitle>
+              <CardDescription class="mt-1">
+                Anggota tim perusahaan
+              </CardDescription>
+            </div>
+            <Badge variant="outline" class="gap-1.5">
+              <UsersIcon class="h-3 w-3" />
+              <span>{{ employees.length }} Karyawan</span>
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div v-if="isLoading" class="flex gap-4 overflow-hidden">
+            <div v-for="i in 4" :key="`emp-skeleton-${i}`" class="flex-shrink-0 w-48">
+              <Skeleton class="h-56 w-full rounded-xl mb-3" />
+              <Skeleton class="h-4 w-3/4 mb-2" />
+              <Skeleton class="h-3 w-1/2" />
+            </div>
+          </div>
+
+          <div v-else class="relative">
+            <!-- Scroll Container -->
+            <div 
+              ref="scrollContainer"
+              class="flex gap-6 overflow-x-auto pb-4 scroll-smooth snap-x snap-mandatory hide-scrollbar"
+              @scroll="updateScrollButtons"
+            >
+              <div
+                v-for="employee in employees"
+                :key="employee.id"
+                class="flex-shrink-0 w-48 snap-start group cursor-pointer"
+                @click="viewEmployeeDetail(employee)"
+              >
+                <div class="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary/5 to-primary/10 border border-border hover:border-primary/50 transition-all duration-300 group-hover:shadow-lg">
+                  <!-- Employee Image -->
+                  <div class="relative h-56 overflow-hidden bg-muted">
+                    <img
+                      v-if="employee.photo_url"
+                      :src="employee.photo_url"
+                      :alt="employee.name"
+                      class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
+                      @error="handleImageError"
+                    />
+                    <div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5">
+                      <div class="text-5xl font-bold text-primary/30">
+                        {{ getInitials(employee.name) }}
+                      </div>
+                    </div>
+                    
+                    <!-- Status Badge -->
+                    <div class="absolute top-3 right-3">
+                      <Badge :variant="employee.is_active ? 'default' : 'secondary'" class="shadow-lg backdrop-blur-sm bg-background/80">
+                        <div :class="`h-1.5 w-1.5 rounded-full mr-1.5 ${employee.is_active ? 'bg-green-500' : 'bg-gray-400'}`" />
+                        {{ employee.is_active ? 'Aktif' : 'Nonaktif' }}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <!-- Employee Info -->
+                  <div class="p-4">
+                    <h4 class="font-semibold text-sm text-foreground truncate mb-1 group-hover:text-primary transition-colors">
+                      {{ employee.name }}
+                    </h4>
+                    <p class="text-xs text-muted-foreground truncate mb-2">
+                      {{ employee.position }}
+                    </p>
+                    <div class="flex items-center gap-1.5">
+                      <Badge variant="outline" class="text-[10px] px-2 py-0.5">
+                        {{ employee.role }}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Empty State -->
+              <div v-if="employees.length === 0" class="w-full flex flex-col items-center justify-center py-12 text-center">
+                <div class="flex items-center justify-center h-16 w-16 rounded-full bg-muted mb-3">
+                  <UsersIcon class="h-8 w-8 text-muted-foreground" />
+                </div>
+                <p class="text-sm font-medium text-muted-foreground">
+                  Belum ada data karyawan
+                </p>
+              </div>
+            </div>
+
+            <!-- Scroll Buttons -->
+            <Button
+              v-if="showLeftScroll"
+              @click="scrollLeft"
+              variant="outline"
+              size="icon"
+              class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 shadow-lg bg-background z-10 hover:scale-110"
+            >
+              <ChevronLeftIcon class="h-5 w-5" />
+            </Button>
+
+            <Button
+              v-if="showRightScroll"
+              @click="scrollRight"
+              variant="outline"
+              size="icon"
+              class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 shadow-lg bg-background z-10 hover:scale-110"
+            >
+              <ChevronRightIcon class="h-5 w-5" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       <!-- Main Grid -->
       <div class="grid gap-6 lg:grid-cols-12">
@@ -387,6 +502,7 @@ import {
   TrendingUpIcon, 
   TrendingDownIcon,
   ChevronRightIcon,
+  ChevronLeftIcon,
   Loader2Icon,
   ClockIcon,
   UsersIcon,
@@ -394,7 +510,8 @@ import {
   CheckCircleIcon,
   PlusIcon,
   FileTextIcon,
-  BarChartIcon
+  BarChartIcon,
+  MinusIcon
 } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -419,6 +536,10 @@ const stats = ref([])
 const recentLeaves = ref([])
 const recentActivities = ref([])
 const chartData = ref([])
+const employees = ref([])
+const scrollContainer = ref(null)
+const showLeftScroll = ref(false)
+const showRightScroll = ref(false)
 
 const formattedDate = computed(() => {
   return new Date().toLocaleDateString('id-ID', { 
@@ -498,6 +619,41 @@ const getLeaveVariant = (status) => {
   return { pending: 'secondary', approved: 'default', rejected: 'destructive' }[status] || 'outline'
 }
 
+const getInitials = (name) => {
+  if (!name) return '?'
+  const names = name.split(' ')
+  if (names.length === 1) return names[0].substring(0, 2).toUpperCase()
+  return (names[0][0] + names[names.length - 1][0]).toUpperCase()
+}
+
+const handleImageError = (e) => {
+  e.target.style.display = 'none'
+}
+
+const updateScrollButtons = () => {
+  if (!scrollContainer.value) return
+  const { scrollLeft, scrollWidth, clientWidth } = scrollContainer.value
+  showLeftScroll.value = scrollLeft > 10
+  showRightScroll.value = scrollLeft < scrollWidth - clientWidth - 10
+}
+
+const scrollLeft = () => {
+  if (scrollContainer.value) {
+    scrollContainer.value.scrollBy({ left: -300, behavior: 'smooth' })
+  }
+}
+
+const scrollRight = () => {
+  if (scrollContainer.value) {
+    scrollContainer.value.scrollBy({ left: 300, behavior: 'smooth' })
+  }
+}
+
+const viewEmployeeDetail = (employee) => {
+  // Navigate to employee detail
+  router.push(`/employees/${employee.id}`)
+}
+
 const refreshData = () => {
   fetchDashboardData()
 }
@@ -522,6 +678,12 @@ const fetchDashboardData = async () => {
           { date: 'Jum', value: 0 }, { date: 'Sab', value: 0 },
           { date: 'Min', value: 0 }
         ]
+    
+    // Set employees data
+    employees.value = response.data.employees || []
+    
+    // Update scroll buttons setelah data dimuat
+    setTimeout(updateScrollButtons, 100)
   } catch (error) {
     console.error('Error loading dashboard:', error)
   } finally {
@@ -546,5 +708,14 @@ onMounted(() => {
 .animate-wave {
   animation: wave 2s ease-in-out infinite;
   display: inline-block;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 </style>

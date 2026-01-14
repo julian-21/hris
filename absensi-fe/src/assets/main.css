@@ -61,8 +61,16 @@
 @layer base {
   * {
     @apply border-border;
+    font-feature-settings: 'cv11', 'ss01';
+    font-variation-settings: 'opsz' auto;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   body {
     @apply bg-background text-foreground;
+  }
+  code, pre {
+    font-feature-settings: 'liga' 1, 'calt' 1;
   }
 }
