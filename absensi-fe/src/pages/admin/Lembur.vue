@@ -209,27 +209,12 @@
                     </TableCell>
                     
                     <TableCell>
-                      <span 
-                        v-if="isRejected(lembur) || lembur.is_expired" 
-                        class="text-muted-foreground text-sm"
-                      >
-                        -
-                      </span>
-                      <div 
-                        v-else-if="!isFullyApproved(lembur)" 
-                        class="flex flex-col"
-                      >
-                        <span class="text-muted-foreground font-medium">
-                          {{ formatMinutes(lembur.sisa_waktu_claim) }}
-                        </span>
-                        <span class="text-[10px] text-yellow-600 italic">
-                          (Proses)
-                        </span>
+                      <span v-if="isRejected(lembur) || lembur.is_expired" class="text-muted-foreground text-sm">-</span>
+                      <div v-else-if="!isFullyApproved(lembur)" class="flex flex-col">
+                        <span class="text-muted-foreground font-medium">{{ formatMinutes(lembur.sisa_waktu_claim) }}</span>
+                        <span class="text-[10px] text-yellow-600 italic">(Proses)</span>
                       </div>
-                      <span 
-                        v-else 
-                        class="text-green-600 font-bold flex items-center gap-1"
-                      >
+                      <span v-else class="text-green-600 font-bold flex items-center gap-1">
                         <CheckCircle2 class="h-3 w-3" />
                         {{ formatMinutes(lembur.sisa_waktu_claim) }}
                       </span>
@@ -272,10 +257,7 @@
                               Edit
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem 
-                              @click="handleDelete(lembur.id)"
-                              class="text-red-600"
-                            >
+                            <DropdownMenuItem @click="handleDelete(lembur.id)" class="text-red-600">
                               <Trash2 class="mr-2 h-4 w-4" />
                               Hapus
                             </DropdownMenuItem>
@@ -292,26 +274,12 @@
                   Menampilkan {{ personalLemburs.length }} dari {{ personalPagination.total }} data
                 </div>
                 <div class="flex items-center space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    @click="changePersonalPage(personalPagination.current_page - 1)"
-                    :disabled="personalPagination.current_page === 1"
-                  >
-                    <ChevronLeft class="h-4 w-4" />
-                    Previous
+                  <Button variant="outline" size="sm" @click="changePersonalPage(personalPagination.current_page - 1)" :disabled="personalPagination.current_page === 1">
+                    <ChevronLeft class="h-4 w-4" /> Previous
                   </Button>
-                  <div class="text-sm">
-                    Halaman {{ personalPagination.current_page }} dari {{ personalPagination.last_page }}
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    @click="changePersonalPage(personalPagination.current_page + 1)"
-                    :disabled="personalPagination.current_page === personalPagination.last_page"
-                  >
-                    Next
-                    <ChevronRight class="h-4 w-4" />
+                  <div class="text-sm">Halaman {{ personalPagination.current_page }} dari {{ personalPagination.last_page }}</div>
+                  <Button variant="outline" size="sm" @click="changePersonalPage(personalPagination.current_page + 1)" :disabled="personalPagination.current_page === personalPagination.last_page">
+                    Next <ChevronRight class="h-4 w-4" />
                   </Button>
                 </div>
               </div>
@@ -373,27 +341,12 @@
                     </TableCell>
                     
                     <TableCell>
-                      <span 
-                        v-if="isRejected(lembur) || lembur.is_expired" 
-                        class="text-muted-foreground text-sm"
-                      >
-                        -
-                      </span>
-                      <div 
-                        v-else-if="!isFullyApproved(lembur)" 
-                        class="flex flex-col"
-                      >
-                        <span class="text-muted-foreground font-medium">
-                          {{ formatMinutes(lembur.sisa_waktu_claim) }}
-                        </span>
-                        <span class="text-[10px] text-yellow-600 italic">
-                          (Proses)
-                        </span>
+                      <span v-if="isRejected(lembur) || lembur.is_expired" class="text-muted-foreground text-sm">-</span>
+                      <div v-else-if="!isFullyApproved(lembur)" class="flex flex-col">
+                        <span class="text-muted-foreground font-medium">{{ formatMinutes(lembur.sisa_waktu_claim) }}</span>
+                        <span class="text-[10px] text-yellow-600 italic">(Proses)</span>
                       </div>
-                      <span 
-                        v-else 
-                        class="text-green-600 font-bold flex items-center gap-1"
-                      >
+                      <span v-else class="text-green-600 font-bold flex items-center gap-1">
                         <CheckCircle2 class="h-3 w-3" />
                         {{ formatMinutes(lembur.sisa_waktu_claim) }}
                       </span>
@@ -465,26 +418,12 @@
                   Menampilkan {{ approvalLemburs.length }} dari {{ approvalPagination.total }} data
                 </div>
                 <div class="flex items-center space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    @click="changeApprovalPage(approvalPagination.current_page - 1)"
-                    :disabled="approvalPagination.current_page === 1"
-                  >
-                    <ChevronLeft class="h-4 w-4" />
-                    Previous
+                  <Button variant="outline" size="sm" @click="changeApprovalPage(approvalPagination.current_page - 1)" :disabled="approvalPagination.current_page === 1">
+                    <ChevronLeft class="h-4 w-4" /> Previous
                   </Button>
-                  <div class="text-sm">
-                    Halaman {{ approvalPagination.current_page }} dari {{ approvalPagination.last_page }}
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    @click="changeApprovalPage(approvalPagination.current_page + 1)"
-                    :disabled="approvalPagination.current_page === approvalPagination.last_page"
-                  >
-                    Next
-                    <ChevronRight class="h-4 w-4" />
+                  <div class="text-sm">Halaman {{ approvalPagination.current_page }} dari {{ approvalPagination.last_page }}</div>
+                  <Button variant="outline" size="sm" @click="changeApprovalPage(approvalPagination.current_page + 1)" :disabled="approvalPagination.current_page === approvalPagination.last_page">
+                    Next <ChevronRight class="h-4 w-4" />
                   </Button>
                 </div>
               </div>
@@ -525,7 +464,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue' // Tambahkan watch
 import { storeToRefs } from 'pinia'
 import { useLemburStore } from '@/stores/lemburStore'
 import { useAuthStore } from '@/stores/auth'
@@ -600,7 +539,7 @@ const filters = ref({
   personal_page: 1, approval_page: 1, per_page: 15
 })
 
-// --- LOGIC PERBAIKAN ---
+// --- LOGIC HELPERS ---
 
 const isFullyApproved = (lembur) => {
   return lembur.status === 'accepted' && lembur.final_status === 'accepted'
@@ -611,9 +550,9 @@ const isRejected = (lembur) => {
 }
 
 const getRowClass = (lembur) => {
-  if (isRejected(lembur)) return 'bg-red-50/50 opacity-70' // Rejected: merah pudar & transparan
-  if (lembur.is_expired) return 'bg-gray-100 opacity-70' // Expired: abu pudar
-  if (isFullyApproved(lembur)) return 'bg-green-50/30' // Approved: hijau sangat tipis
+  if (isRejected(lembur)) return 'bg-red-50/50 opacity-70'
+  if (lembur.is_expired) return 'bg-gray-100 opacity-70'
+  if (isFullyApproved(lembur)) return 'bg-green-50/30'
   return ''
 }
 
@@ -626,7 +565,9 @@ const currentUserId = computed(() => {
   return authStore.user?.id || parseInt(localStorage.getItem('user_id'))
 })
 
-// Data Fetching
+// --- DATA FETCHING (DIPERBAIKI) ---
+
+// 1. Fetch Personal: Kirim user_id ke backend
 const fetchPersonalLemburs = async () => {
   loadingPersonal.value = true
   try {
@@ -638,17 +579,19 @@ const fetchPersonalLemburs = async () => {
       month: filters.value.month,
       page: filters.value.personal_page,
       per_page: filters.value.per_page,
-      user_id: currentUserId.value
+      user_id: currentUserId.value // Wajib kirim ID sendiri
     }
+    
+    // Panggil Store
     await lemburStore.fetchLemburs(params.page, params)
     
-    // Store result to local state
+    // Copy data store ke variabel lokal agar tidak tertimpa tab lain
     if (lemburStore.lemburs && Array.isArray(lemburStore.lemburs)) {
-      personalLemburs.value = lemburStore.lemburs.filter(l => l.user_id === currentUserId.value)
+      personalLemburs.value = [...lemburStore.lemburs] // Shallow copy
       personalPagination.value = {
         current_page: lemburStore.pagination?.current_page || 1,
         last_page: lemburStore.pagination?.last_page || 1,
-        total: personalLemburs.value.length
+        total: lemburStore.pagination?.total || 0
       }
     }
   } catch (error) {
@@ -658,6 +601,7 @@ const fetchPersonalLemburs = async () => {
   }
 }
 
+// 2. Fetch Approval: JANGAN kirim user_id (agar Admin lihat semua)
 const fetchApprovalLemburs = async () => {
   if (!canApprove.value) return
   loadingApproval.value = true
@@ -670,11 +614,14 @@ const fetchApprovalLemburs = async () => {
       month: filters.value.month,
       page: filters.value.approval_page,
       per_page: filters.value.per_page
+      // user_id sengaja tidak dikirim
     }
+    
     await lemburStore.fetchLemburs(params.page, params)
     
+    // Copy data store ke variabel lokal
     if (lemburStore.lemburs && Array.isArray(lemburStore.lemburs)) {
-      approvalLemburs.value = lemburStore.lemburs
+      approvalLemburs.value = [...lemburStore.lemburs] // Shallow copy
       approvalPagination.value = {
         current_page: lemburStore.pagination?.current_page || 1,
         last_page: lemburStore.pagination?.last_page || 1,
@@ -688,14 +635,28 @@ const fetchApprovalLemburs = async () => {
   }
 }
 
-// Global Loader
+// 3. Main Load Data (Statistics + Current Tab)
 const loadData = async () => {
-  await Promise.all([
-    fetchPersonalLemburs(),
-    canApprove.value ? fetchApprovalLemburs() : Promise.resolve(),
-    lemburStore.fetchStatistics()
-  ])
+  // Ambil statistik selalu
+  lemburStore.fetchStatistics()
+
+  // Ambil data sesuai tab yang sedang aktif saja
+  if (activeTab.value === 'personal') {
+    await fetchPersonalLemburs()
+  } else if (activeTab.value === 'approval' && canApprove.value) {
+    await fetchApprovalLemburs()
+  }
 }
+
+// --- WATCHER ---
+// Update data otomatis saat pindah tab
+watch(activeTab, (newTab) => {
+  if (newTab === 'personal') {
+    fetchPersonalLemburs()
+  } else if (newTab === 'approval') {
+    fetchApprovalLemburs()
+  }
+})
 
 // Filter Handlers
 const initFilters = () => {
@@ -717,8 +678,10 @@ const resetFilters = () => {
 }
 
 const handleFilterChange = () => {
+  // Reset page ke 1
   filters.value.personal_page = 1
   filters.value.approval_page = 1
+  // Load data tab aktif
   loadData()
 }
 
@@ -777,7 +740,10 @@ const closeFormDialog = () => {
 const handleSaved = () => {
   closeFormDialog()
   showSuccessToast('Lembur berhasil disimpan')
-  loadData()
+  // Refresh tab personal
+  fetchPersonalLemburs()
+  // Update stats
+  lemburStore.fetchStatistics()
 }
 
 // Actions
@@ -785,7 +751,8 @@ const handleApprove = async (id) => {
   try {
     await lemburStore.approveLembur(id)
     showSuccessToast('Lembur berhasil disetujui')
-    loadData()
+    fetchApprovalLemburs() // Refresh list approval
+    lemburStore.fetchStatistics()
   } catch (error) {
     handleApiError(error)
   }
@@ -795,7 +762,8 @@ const handleReject = async (id) => {
   try {
     await lemburStore.rejectLembur(id)
     showSuccessToast('Lembur berhasil ditolak')
-    loadData()
+    fetchApprovalLemburs()
+    lemburStore.fetchStatistics()
   } catch (error) {
     handleApiError(error)
   }
@@ -805,7 +773,8 @@ const handleFinalApprove = async (id) => {
   try {
     await lemburStore.finalApproveLembur(id)
     showSuccessToast('Lembur berhasil final approved')
-    loadData()
+    fetchApprovalLemburs()
+    lemburStore.fetchStatistics()
   } catch (error) {
     handleApiError(error)
   }
@@ -815,7 +784,8 @@ const handleFinalReject = async (id) => {
   try {
     await lemburStore.finalRejectLembur(id)
     showSuccessToast('Lembur berhasil final rejected')
-    loadData()
+    fetchApprovalLemburs()
+    lemburStore.fetchStatistics()
   } catch (error) {
     handleApiError(error)
   }
@@ -832,19 +802,22 @@ const confirmDelete = async () => {
     showSuccessToast('Lembur berhasil dihapus')
     showDeleteDialog.value = false
     deletingId.value = null
-    loadData()
+    fetchPersonalLemburs() // Refresh list personal
+    lemburStore.fetchStatistics()
   } catch (error) {
     handleApiError(error)
   }
 }
 
 const showExpiringSoon = () => {
+  // Implementasi view expiring logic (misal filter status & sort date)
   console.log('Show expiring soon')
 }
 
 onMounted(async () => {
   if (!authStore.user) await authStore.fetchUser()
   initFilters()
+  // Load data initial sesuai tab default (personal)
   loadData()
 })
 </script>
